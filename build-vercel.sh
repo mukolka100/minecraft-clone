@@ -1,28 +1,28 @@
 #!/bin/bash
-set -e # Stop on first error
+set -e
 
-# 1. FORCE HOME PATHS
+# 1. Environment Setup
 export CARGO_HOME="$HOME/.cargo"
-export RUSTUP_HOME="$HOME/.rustup"
 export PATH="$CARGO_HOME/bin:$PATH"
 
-echo "--- Checking Environment ---"
-if ! command -v rustc &> /dev/null; then
-    echo "Rust not found. Installing..."
+echo "--- Preparing Rust ---"
+if ! command -v rustup &> /dev/null; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-    # Explicitly source the env file
-    . "$CARGO_HOME/env"
 fi
 
+# Load environment and force stable
+. "$CARGO_HOME/env"
+rustup default stable
+
+# 2. Install wasm-pack
 if ! command -v wasm-pack &> /dev/null; then
-    echo "wasm-pack not found. Installing..."
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 fi
 
-# 2. VERIFY INSTALLS
-echo "Using Rust: $(rustc --version)"
-echo "Using wasm-pack: $(wasm-pack --version)"
+echo "--- Versions ---"
+rustc --version
+wasm-pack --version
 
-# 3. RUN BUILD
-echo "--- Compiling Rust to WASM ---"
-wasm-pack build --target web --out-dir public/pkg
+# 3. Build Command (Make sure this points to your Cargo.toml)
+echo "--- Building WASM ---"
+wasm-pack build --target web --out-dir public/pkg .
