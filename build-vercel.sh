@@ -1,32 +1,30 @@
 #!/bin/bash
 set -e
 
-# 1. Environment Setup
+echo "--- ТЕКУЩАЯ ПАПКА: $(pwd) ---"
+ls -F
+
+# Установка путей
 export CARGO_HOME="$HOME/.cargo"
 export PATH="$CARGO_HOME/bin:$PATH"
 
-echo "--- Installing/Updating Rust ---"
-# Install rustup if not found
+# Установка Rust
 if ! command -v rustup &> /dev/null; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 fi
 
-# Load environment
 . "$CARGO_HOME/env"
-rustup default stable || true
+rustup default stable
 
-# 2. Install wasm-pack
-echo "--- Checking wasm-pack ---"
+# Установка wasm-pack
 if ! command -v wasm-pack &> /dev/null; then
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 fi
 
-# 3. Final Build
-echo "--- Building WASM ---"
-# Double-check that Cargo.toml exists in the current folder
+echo "--- СБОРКА WASM ---"
+# Проверка наличия Cargo.toml перед билдом
 if [ ! -f "Cargo.toml" ]; then
-    echo "ERROR: Cargo.toml not found in $(pwd)"
-    ls -F
+    echo "ОШИБКА: Cargo.toml не найден в корне!"
     exit 1
 fi
 
