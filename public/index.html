@@ -1,0 +1,18 @@
+import init, { WorldGenerator } from './pkg/voxel_engine.js';
+
+async function start() {
+    try {
+        // Initialize WASM binary
+        await init(); 
+        
+        // Safety: Clear previous cache to prevent render distance crashes
+        const gen = new WorldGenerator(Math.random() * 1000);
+        
+        // Start Three.js logic here...
+        console.log("Rust Engine Loaded Successfully");
+    } catch (e) {
+        console.error("WASM Load Failure:", e);
+        document.getElementById('status').innerText = "Hardware Acceleration Required";
+    }
+}
+start();

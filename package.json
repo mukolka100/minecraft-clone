@@ -1,0 +1,8 @@
+{
+  "name": "minecraft-clone",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "wasm-pack build --target web --out-dir public/pkg",
+    "vercel-build": "bash build-vercel.sh"
+  }
+}
