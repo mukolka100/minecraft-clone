@@ -1,32 +1,28 @@
 #!/bin/bash
-# Exit on any error
-set -e
+set -e # Stop on first error
 
-echo "--- Current Directory: $(pwd) ---"
+# 1. FORCE HOME PATHS
+export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
+export PATH="$CARGO_HOME/bin:$PATH"
 
-# 1. Install Rustup/Cargo if not present
-if ! command -v cargo &> /dev/null; then
-    echo "Installing Rust..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
-else
-    echo "Rust already installed."
+echo "--- Checking Environment ---"
+if ! command -v rustc &> /dev/null; then
+    echo "Rust not found. Installing..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+    # Explicitly source the env file
+    . "$CARGO_HOME/env"
 fi
 
-# 2. Install wasm-pack if not present
 if ! command -v wasm-pack &> /dev/null; then
-    echo "Installing wasm-pack..."
+    echo "wasm-pack not found. Installing..."
     curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-    source "$HOME/.cargo/env"
 fi
 
-# 3. Explicitly add Cargo bin to PATH for this session
-export PATH="$HOME/.cargo/bin:$PATH"
+# 2. VERIFY INSTALLS
+echo "Using Rust: $(rustc --version)"
+echo "Using wasm-pack: $(wasm-pack --version)"
 
-echo "--- Versions ---"
-rustc --version
-wasm-pack --version
-
-# 4. Build with full path to ensure no 'command not found'
-echo "--- Starting Build ---"
+# 3. RUN BUILD
+echo "--- Compiling Rust to WASM ---"
 wasm-pack build --target web --out-dir public/pkg
