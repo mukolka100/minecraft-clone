@@ -4,8 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Объявляем фичу, чтобы компилятор перестал ругаться
+wee_alloc = ["dep:wee_alloc"]
 
 [dependencies]
 wasm-bindgen = "0.2"
 noise = "0.8"
+# Делаем зависимость опциональной, чтобы она включалась только через фичу
+wee_alloc = { version = "0.4.5", optional = true }
