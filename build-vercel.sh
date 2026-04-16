@@ -1,31 +1,31 @@
 #!/bin/bash
 set -e
 
-echo "--- ТЕКУЩАЯ ПАПКА: $(pwd) ---"
-ls -F
-
-# Установка путей
+# 1. Установка путей
 export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
 export PATH="$CARGO_HOME/bin:$PATH"
 
-# Установка Rust
-if ! command -v rustup &> /dev/null; then
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-fi
+echo "--- Установка Rust и Toolchain ---"
+# Устанавливаем Rust молча и быстро
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
 
+# Принудительно загружаем переменные
 . "$CARGO_HOME/env"
+
+# Устанавливаем дефолт и проверяем
 rustup default stable
+rustup target add wasm32-unknown-unknown
 
-# Установка wasm-pack
-if ! command -v wasm-pack &> /dev/null; then
-    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-fi
+echo "--- Установка wasm-pack ---"
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-echo "--- СБОРКА WASM ---"
-# Проверка наличия Cargo.toml перед билдом
-if [ ! -f "Cargo.toml" ]; then
-    echo "ОШИБКА: Cargo.toml не найден в корне!"
-    exit 1
-fi
+# 2. Проверка путей перед билдом
+echo "Path: $PATH"
+echo "Rustc: $(which rustc || echo 'not found')"
+echo "Wasm-pack: $(which wasm-pack || echo 'not found')"
 
-wasm-pack build --target web --out-dir public/pkg
+# 3. Сборка
+echo "--- Запуск компиляции ---"
+# Используем полный путь к wasm-pack, чтобы исключить ошибки PATH
+$CARGO_HOME/bin/wasm-pack build --target web --out-dir public/pkg
